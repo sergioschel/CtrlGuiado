@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>WebAR - Calibrador no Cilindro</title>
+
+  <!-- MindAR + Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+  </style>
+</head>
+
+<body>
+<script>
+(async () => {
+
+  // 1️⃣ Inicializa o MindAR
+  const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+    container: document.body,
+    imageTargetSrc: 'targets/bloco1.mind'
+  });
+
+  const { renderer, scene, camera } = mindarThree;
+
+  // 2️⃣ Luz básica
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  scene.add(light);
+
+  // 3️⃣ Anchor do alvo (bloco do motor)
+  const anchor = mindarThree.addAnchor(0);
+
+  // 4️⃣ Textura do calibrador (imagem 2D)
+  const textureLoader = new THREE.TextureLoader();
+  const calibradorTexture = textureLoader.load('assets/calibrador1.jpg');
+
+  // 5️⃣ Plano 2D do calibrador
+  const geometry = new THREE.PlaneGeometry(0.25, 0.15); // ajuste de tamanho
+  const material = new THREE.MeshBasicMaterial({
+    map: calibradorTexture,
+    transparent: true
+  });
+
+  const calibrador = new THREE.Mesh(geometry, material);
+
+  // 6️⃣ POSIÇÃO DO CALIBRADOR (cilindro)
+  // 🔧 Ajuste estes valores conforme o cilindro desejado
+  calibrador.position.set(
+    0.10, // X → esquerda/direita
+    0.00, // Y → cima/baixo
+    0.05  // Z → "entrada" no cilindro
+  );
+
+  // 7️⃣ ROTAÇÃO (se precisar alinhar)
+  calibrador.rotation.x = -Math.PI / 2;
+
+  // 8️⃣ Anexa o calibrador ao alvo
+  anchor.group.add(calibrador);
+
+  // 9️⃣ Inicia a câmera
+  await mindarThree.start();
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+  });
+
+})();
+</script>
+</body>
+</html>
